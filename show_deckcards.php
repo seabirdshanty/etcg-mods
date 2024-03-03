@@ -3,6 +3,8 @@
 // This shows cards from a specific deck within a specific pile *that is not collecting*
 // ie show ONLY shineinouzen cards from your futures pile, chii from your trades pile ect.
 // this is so you dont go nuts having a ton of collecting decks, or showing off cards for your valentines pairings :3
+// add this to the end of your MODS.PHP file!
+
 function show_deckcards($tcg, $category = '', $deckname = '') {
 	
 	// get ready to grab form the database
@@ -25,7 +27,7 @@ function show_deckcards($tcg, $category = '', $deckname = '') {
 	// make a new array to push to
 	$printMe = array();
 
-  // dig through the cards array
+  	// dig through the cards array
 	foreach ($cards as &$card) {
 		// push each card with the deckname to a different array
 		if ( strpos($card,$deckname) !== false ) {
