@@ -1,4 +1,4 @@
-/* 
+<?php /* 
 Combines Rizu's combinemypile with Joey's showundertext, as well as providing to show the entire combined pile as text
  
 Rizus Text:
@@ -96,3 +96,4 @@ function combinemypile_ut($tcg, $doubles = 0, $cata, $catb, $catc = '', $catd = 
 		}
 	}
 }
+?>
