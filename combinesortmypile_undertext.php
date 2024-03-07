@@ -14,7 +14,7 @@ FUNCTION OVERVIEW
 combinesortmypile($tcg, $doubles = 1, $startSort = '0', $endSort = 'z', $text = false, $cata, $catb, $catc = '', $catd = '', $cate = '')
 
   Combine up to 5 categories into one pile, then OPTIONALLY sort them depending on your query.
-  This functionally replaces Rizus sortmypile and combinemypile, so you can remove and replace those if you like.
+  This functionally replaces Rizus combinemypile, so you can remove and replace that if you like.
   
   - string $tcg = the name of the TCG as defined in the database.
   - int $doubles = 0 show all cards; 1 shows only unique cards; 2 shows only doubles.
