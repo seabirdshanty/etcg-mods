@@ -39,6 +39,7 @@ This wondapri function does 4 things:
     (Will Show Images with Undertext by Default)
 
 NOTE: This does NOT include the Pending in Keeping Mod. I'll get to it when I can.
+This can be used with Caitlins Show Cards as Text search mod @ https://idolisetutorials.notion.site/Show-cards-as-text-e32c64773294482e9c462994ae5db729 !
 
 Majority of Code Belongs to Rizu & Joey. PLEASE credit them when using this code.
 I also did my best to OPTIMIZE Rizus sort code for doubles cause uh. That repeated 3 times and I went nuts copy-pasting it all. rip
@@ -115,7 +116,7 @@ function combinesortmypile($tcg, $doubles = 0, $startSort = '0', $endSort = 'z',
   				$card = trim($card); 
   				if($card != '') { 
   					if(preg_match("$searchme", $card[0])){ // you NEED the bracket integer [0] so the sort works!
-  						if ( $text == true ) { echo $card.', '; }
+  						if ( $text == true ) { echo '<span title="' .$card. '">'.$card.'</span>'; }
   						else {
   							echo '<li><img src="'.$cardsurl.''.$card.'.'.$format.'" alt="" title="'.$card.'" /><span class="cardname">'.$card.'</span></li>';
   						}
