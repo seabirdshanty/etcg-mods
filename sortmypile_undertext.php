@@ -1,13 +1,20 @@
-<?php
+<?php /* 
+Divide a card pile into multiple ones without creating new categories.
+edit 03/07/2024: optimized code & added ability to show piles as text 
 
-// Divide a card pile into multiple ones without creating new categories.
-// $tcg = the name of the TCG as defined in the database; $category = the card category to display;
-// $start = the value you want to start with; $end = the value you want to end with; $doubles = divide pile into uniques + doubles
-// MODDED - Shows undertext via Joey's Mod (No Pending in Keeping!) from https://tcg.hopeful-despair.net/showtext.php
-// All code belongs to RIZU and JOEY - I just modified it so it all works together.
-// add this to the end of you MODS.PHP file
+function sortmypile($tcg, $category, $start = '', $end = '', $doubles = 0, text = false)
+	$tcg = the name of the TCG as defined in the database; $category = the card category to display;
+	$start = the value you want to start with; $end = the value you want to end with; 
+	$doubles = 0 Show all, 1 show uniques only, 2 Show Doubles only
+ 	$text = display as images w undertext (false) or as plaintext (true)
 
-function sortmypile($tcg, $category, $start = '', $end = '', $doubles = 0) {
+Function originally by Rizu from http://tcg.haltfate.org/stuff.php
+MODDED - Shows undertext via Joey's Mod (No Pending in Keeping!) from https://tcg.hopeful-despair.net/showtext.php
+All code belongs to RIZU and JOEY - I just modified it so it all works together.
+
+ADD THIS TO THE END OF YOUR MODS.PHP file */
+
+function sortmypile($tcg, $category, $start = '', $end = '', $doubles = 0, $text = false) {
 	$database = new Database;
 	$sanitize = new Sanitize;
 	$tcg = $sanitize->for_db($tcg);
@@ -30,36 +37,30 @@ function sortmypile($tcg, $category, $start = '', $end = '', $doubles = 0) {
 	if($cards === '') {
 		 echo '<p class="cards"><em>There are currently no cards under this category.</em></p>'; 
 	} else {
-		$cards = explode(',',$cards['cards']);
-		$cards = array_map(trim, $cards);
-		$array_count = count($cards);
+		$cardsall = explode(', ',$cards); // explode the cards string
+		sort($cardsall); // sort cards
+		$array_count = count($cards);	// count the number of cards?? idk why this is here, it was in Rizu's OG code. Maybe for Combined Worth?
+
+		$cardsall = array_map(trim, $cardsall);	// all cards		
+		$cardsuni = array_unique($cardsall); // all unique/first cards
+		$cardsdou = array_diff_assoc($cardsall, array_unique($cardsall)); // all doubles
+
+		// check what cards were using
+		$cardsInPlay = array();	
+		if( $doubles == 0 ) { $cardsInPlay = $cardsall;} 
+    		elseif( $doubles == 1) { $cardsInPlay = $cardsuni; }
+    		elseif( $doubles == 2) {  $cardsInPlay = $cardsdou; }
+
 		echo "<ul class=\"list-inline\">";
-		if($doubles > 0) {
-			$cardsuni = array_unique($cards);
-			$cardsdou = array_diff_assoc($cards, array_unique($cards));
-			foreach( $cardsuni as $card ) {
-				$card = trim($card);
-				if(preg_match("$searchme", $card[0])){ 
-					echo '<li><img src="'.$cardsurl.''.$card.'.'.$format.'" alt="" title="'.$card.'" /><span class="cardname">'.$card.'</span></li>';
-				} 
-			}
-			foreach( $cardsdou as $cardd ) {
-				$cardd = trim($cardd);
-				if(preg_match($searchme, $cardd[0])){ 
-					echo '<li><img src="'.$cardsurl.''.$card.'.'.$format.'" alt="" title="'.$card.'" /><span class="cardname">'.$card.'</span></li>';
-				} 
-			}
-		} else {
-			foreach( $cards as $card ) {
-				$card = trim($card);
-				if(preg_match($searchme, $card[0])){ 
-					echo '<li><img src="'.$cardsurl.''.$card.'.'.$format.'" alt="" title="'.$card.'" /><span class="cardname">'.$card.'</span></li>';
-				} 
-			}
-			//echo '</p>';
-			
-		} 
-		echo "</ul>";
+  		foreach ( $cardsInPlay as $card ) { 
+  			$card = trim($card); 
+  			if($card != '') { 
+  				if ( $text == true ) { echo $card.', '; }
+  				else { echo '<li><img src="'.$cardsurl.''.$card.'.'.$format.'" alt="" title="'.$card.'" /><span class="cardname">'.$card.'</span></li>'; }
+  			}
+  		} 
+  		echo "</ul>";
+  		unset($card);
 	} 
 }
 
@@ -77,7 +78,4 @@ function sortmypile($tcg, $category, $start = '', $end = '', $doubles = 0) {
     margin: 4px;
   }
 </style>
-
-<!-- to display -->
-<ul id="cardlist"><?php show_undertext('TCG','category'); ?></ul>
 
