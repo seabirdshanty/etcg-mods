@@ -5,7 +5,7 @@ Rizus Text:
   Combine up to 5 categories into one pile.
   $tcg = the name of the TCG as defined in the database.
   $cata, $catb, $catc, $catd, $cate = the categories you want to combine. a and b are obligatory. 
-  $doubles = 1 divide pile into uniques/doubles; 2 shows only unique cards; 3 shows only doubles.
+  $doubles = 0 Showd full pile; 1 shows only unique cards; 2 shows only doubles.
 
 Use As:
 combinemypile_ut($tcg, $doubles, $cata, $catb, $catc, $catd, $cate, $text);
@@ -49,13 +49,10 @@ function combinemypile_ut($tcg, $doubles = 0, $cata, $catb, $catc = '', $catd = 
 		$cardsdou = array_diff_assoc($cardsall, array_unique($cardsall)); // all doubles
 
 		$cardsInPlay = array();	
-		if( $doubles == 0) {
-			// no doubles? no problem ;3
-			$cardsInPlay = $cardsall;
-		} else {
-			// display doubles!
-			$cardsInPlay = array_merge($cardsuni, $cardsdou);
-		}
+		if( $doubles == 0 ) { $cardsInPlay = $cardsall;} 
+    		elseif( $doubles == 1) { $cardsInPlay = $cardsuni; }
+    		elseif( $doubles == 2) {  $cardsInPlay = $cardsdou; }
+
 
 		echo "<ul class=\"list-inline\">";
 		foreach ( $cardsInPlay as $card ) { 
