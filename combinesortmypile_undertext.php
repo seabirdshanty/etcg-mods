@@ -107,11 +107,10 @@ function combinesortmypile($tcg, $doubles = 0, $startSort = '0', $endSort = 'z',
 		// check what cards were using
 		$cardsInPlay = array();	
 		if( $doubles == 0 ) { $cardsInPlay = $cardsall;} 
-    elseif( $doubles == 1) { $cardsInPlay = $cardsuni; }
-    elseif( $doubles == 2) {  $cardsInPlay = $cardsdou; }
+    		elseif( $doubles == 1) { $cardsInPlay = $cardsuni; }
+    		elseif( $doubles == 2) {  $cardsInPlay = $cardsdou; }
 
 		echo "<ul class=\"list-inline\">";
-    if(doubles > 0) {
   		foreach ( $cardsInPlay as $card ) { 
   				$card = trim($card); 
   				if($card != '') { 
@@ -125,7 +124,6 @@ function combinesortmypile($tcg, $doubles = 0, $startSort = '0', $endSort = 'z',
   		} 
   		echo "</ul>";
   		unset($card);
-    }
 	}
 }
 
