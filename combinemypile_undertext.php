@@ -16,7 +16,7 @@ combinemypile( 'tcgname', '', 'aria1', 'aria2', 'aria3')
 Example 2: I want tocmbine all my keeps pile into 1 and display it as text
 combinemypile_ut( 'tcgname', '', 'keeps_high', 'keeps_med', 'keeps_low', , true)
 
-All code belongs to RIZU and JOEY - I just modified it so it all works together.
+All code belongs to RIZU and JOEY - I just modified & optimized it so it all works together.
 ADD TO THE END OF YOUR MODS.PHP FILE
 
 */
@@ -47,53 +47,45 @@ function combinemypile_ut($tcg, $doubles = 0, $cata, $catb, $catc = '', $catd = 
 		$cardsall = array_map(trim, $cardsall);			
 		$cardsuni = array_unique($cardsall);
 		$cardsdou = array_diff_assoc($cardsall, array_unique($cardsall));
-		if($doubles == 0) {			
-			echo "<ul class=\"list-inline\">";
-			foreach ( $cardsall as $card ) { 
-				$card = trim($card); 
-				if($card != '') { 
-					if ( $text == true ) {
-							echo $card.', ';
-					}
-					else {
-						echo '<li><img src="'.$cardsurl.''.$card.'.'.$format.'" alt="" title="'.$card.'" /><span class="cardname">'.$card.'</span></li>';
-					}
+
+		// init an array for cards that are in play
+		$cardsInPlay = array();	
+		if( $doubles == 0) {
+			// no doubles? no problem ;3
+			$cardsInPlay = $cardsall;
+		} else {
+			// use modulous to find out if you need 1, 2 or 3
+			if ( $doubles % 2 == 0 ) { $cardsInPlay = $cardsuni; } // for 2
+			else { $cardsInPlay = $cardsdou; } // for 1 or 3
+		}
+
+		echo "<ul class=\"list-inline\">";
+		foreach ( $cardsInPlay as $card ) { 
+			$card = trim($card); if($card != '') { 
+				if ( $text == true ) { echo $card.', '; }
+				else {
+					echo '<li><img src="'.$cardsurl.''.$card.'.'.$format.'" alt="" title="'.$card.'" /><span class="cardname">'.$card.'</span></li>';
 				}
 			}
-			echo "</ul>";
 		} 
-		else {
-			if($doubles == 1 || $doubles == 2 ) { 
-				echo "<ul class=\"list-inline\">";
-				foreach ( $cardsuni as $card ) { 
-					$card = trim($card); 
-					if($card != '') { 
-						if ( $text == true ) {
-							echo $card.', ';
-						}
-						else {
-							echo '<li><img src="'.$cardsurl.''.$card.'.'.$format.'" alt="" title="'.$card.'" /><span class="cardname">'.$card.'</span></li>';
-						}
-					}
-				} 
-				echo '</ul>'; 
-			}
-			if($doubles == 1 || $doubles == 3 ) { 
-				echo "<ul class=\"list-inline\">";
-				foreach ( $cardsdou as $cardd ) { 
-					$cardd = trim($cardd); 
-					if($cardd != '') { 
-						if ( $text == true ) {
-							echo $card.', ';
-						}
-						else {
-							echo '<li><img src="'.$cardsurl.''.$card.'.'.$format.'" alt="" title="'.$card.'" /><span class="cardname">'.$card.'</span></li>';
-						}
-					} 
-				} 
-				echo '</ul>'; 
-			}
-		}
+		echo "</ul>";
+
+		// unset foreach variable or deal w a memory leak!
+		unset($card);
+
 	}
 }
 ?>
+
+<!-- Add this to your Stylesheet -->
+<style>
+#cardlist li {
+    display: inline-block;
+}
+.cardname { line-height: 25px;
+    width: 115px;
+    display: block;
+    font-size: 11px;
+    margin: 4px;
+  }
+</style>
