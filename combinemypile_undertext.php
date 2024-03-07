@@ -42,21 +42,19 @@ function combinemypile_ut($tcg, $doubles = 0, $cata, $catb, $catc = '', $catd = 
 		echo '<p class="cards"><em>There are currently no cards under this category.</em></p>'; 
 	} 
 	else {
-		$cardsall = explode(', ',$cards);
-		sort($cardsall);
-		$cardsall = array_map(trim, $cardsall);			
-		$cardsuni = array_unique($cardsall);
-		$cardsdou = array_diff_assoc($cardsall, array_unique($cardsall));
+		$cardsall = explode(', ',$cards); // explode the cards string
+		sort($cardsall); // sort cards
+		$cardsall = array_map(trim, $cardsall);	// all cards		
+		$cardsuni = array_unique($cardsall); // all unique/first cards
+		$cardsdou = array_diff_assoc($cardsall, array_unique($cardsall)); // all doubles
 
-		// init an array for cards that are in play
 		$cardsInPlay = array();	
 		if( $doubles == 0) {
 			// no doubles? no problem ;3
 			$cardsInPlay = $cardsall;
 		} else {
-			// use modulous to find out if you need 1, 2 or 3
-			if ( $doubles % 2 == 0 ) { $cardsInPlay = $cardsuni; } // for 2
-			else { $cardsInPlay = $cardsdou; } // for 1 or 3
+			// display doubles!
+			$cardsInPlay = array_merge($cardsuni, $cardsdou);
 		}
 
 		echo "<ul class=\"list-inline\">";
