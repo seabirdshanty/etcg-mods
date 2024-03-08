@@ -114,8 +114,7 @@ function combinesortmypile($tcg, $doubles = 0, $startSort = '0', $endSort = 'z',
 		echo "<ul class=\"list-inline\">";
   		foreach ( $cardsInPlay as $card ) { 
   				$card = trim($card); 
-  				if($card != '') { 
-  					if(preg_match("$searchme", $card[0])){ // you NEED the bracket integer [0] so the sort works!
+  				if($card != '' && preg_match("$searchme", $card[0])){ // you NEED the bracket integer [0] so the sort works!
   						if ( $text == true ) { echo '<span title="' .$card. '">'.$card.'</span>'; }
   						else {
   							echo '<li><img src="'.$cardsurl.''.$card.'.'.$format.'" alt="" title="'.$card.'" /><span class="cardname">'.$card.'</span></li>';
