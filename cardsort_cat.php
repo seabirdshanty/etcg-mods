@@ -280,7 +280,7 @@ $excludeMeSize = sizeof($excludeMe);
 
 if( $sayArraySize !== $excludeMeSize ) {
 	echo "<h3>Unsorted Cards</h3>";
-	$extraCards = array_diff($leftoverArray, $excludeMe);
+	$extraCards = array_diff($sayArray, $excludeMe);
 	$extraCardsPrint = implode(", ", $extraCards);
 	echo $extraCardsPrint;
 }
