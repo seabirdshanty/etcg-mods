@@ -1,4 +1,5 @@
-<?php define('VALID_INC', TRUE); include_once 'func.php';
+<?php 
+define('VALID_INC', TRUE); include_once 'func.php';
 /* 
 ==============================================
     Card Sort via category
@@ -32,6 +33,7 @@ NOTE: This is it's own standalone page, reading database info from your func.php
 Make sure none of the function calls interact with any of your mods.
 
 grabCats()
+callCollect()
 catCards()
 deckArray()
 cardArray()
@@ -56,8 +58,9 @@ $workArray = array();
 $inputArrays = array();
 
 function grabCats( $tcg ) {
-  // grabs categories from the database
-	$holdCats = array(); 
+	// grabs categories from the database
+	$holdCats = array(); //categories
+
 	$database = new Database;
 	$sanitize = new Sanitize;
 	$tcg = $sanitize->for_db($tcg);
@@ -67,27 +70,63 @@ function grabCats( $tcg ) {
 
 	$counter = 1;
 
+	// grabs each category name from the database
 	while ($counter > 0) {
 		$result = $database->get_assoc("SELECT * FROM `cards` WHERE `tcg`='$tcgid' AND `id`='$counter' ");
 		$pushMe = $result['category'];
+		// if the name is empty, dont push
 		if($pushMe == "") { 
 			// check next value
 			$checkIt = $counter + 1;
 		    $wonder = $database->get_assoc("SELECT * FROM `cards` WHERE `tcg`='$tcgid' AND `id`='$checkIt' ");
 			$wonder = $wonder['category'];
+			// if THAT's empty, break
 			if($wonder == "") {
 				unset( $wonder, $pushMe, $result );
 				break; 
 			}
 		} else {
+			// push otherwise
 			array_push($holdCats, $pushMe);
 		}
+		
 		$counter++;
 	}
+
+	// get cats :3
 	return $holdCats;
+	
 }
 
+// grab cards from collecting
+function callCollect( $tcg ) {
+	$database = new Database;
+	$sanitize = new Sanitize;
+	$tcg = $sanitize->for_db($tcg);
+
+	$result = $database->get_assoc("SELECT `id` FROM `tcgs` WHERE `name`='$tcg' LIMIT 1");
+	$tcgid = $result['id'];
+
+	$result = $database->query("SELECT * FROM `collecting` WHERE `tcg` = '$tcgid' AND `mastered` = '0' ORDER BY `sort`, `deck`");
+	$cards = '';
+
+	while ($row = mysqli_fetch_assoc($result)) {	
+		$current = explode(', ', $row[cards]);
+		if($row['count'] == count($current)){
+
+		} 
+		else {
+		$cards .= $row['cards'] . ', ';
+		$total[$row['deck']] = $row['count'];
+		}
+	}
+
+	return $cards;
+}
+
+// grab cards from categories
 function catCards( $tcg, $category, $worth = '') {
+	
 	$database = new Database;
 	$sanitize = new Sanitize;
 	$tcg = $sanitize->for_db($tcg);
@@ -95,93 +134,135 @@ function catCards( $tcg, $category, $worth = '') {
 
 	$result = $database->get_assoc("SELECT `id` FROM `tcgs` WHERE `name`='$tcg' LIMIT 1");
 	$tcgid = $result['id'];
-  
-  $result = $database->get_assoc("SELECT `cards` FROM `cards` WHERE `tcg`='$tcgid' AND `category`='$category' LIMIT 1");
+
+	 $result = $database->get_assoc("SELECT `cards` FROM `cards` WHERE `tcg`='$tcgid' AND `category`='$category' LIMIT 1");
 	return $result['cards'];
 }
 
+// make a deck array
 function deckArray ( string $inputCards ) {
 	$exportArray = array();
-  
+
 	// explode each card
 	$inputArray = explode(', ', $inputCards );
-  
+
 	// remove duplicates
 	$inputArray = array_values(array_unique($inputArray));
 
-  //push to return array
+	//push to return array
 	foreach ( $inputArray as &$value ) {
 		array_push($exportArray, $value);
 	}
 
-  // unset foreach
+	// unset foreach
 	unset( $value );
-  
+	
 	// return!
 	return $exportArray;
 }
 
+// make a card array
 function cardArray ( string $inputCards ) {
 	$exportArrayTwo = array();
-  
+
 	// explode each card
 	$exportArrayTwo = explode(', ', $inputCards );
-  
-  // return
+
+	// return!
 	return $exportArrayTwo;
 }
 
 
 function replaceNumber( string $fixMe ) {
-  // replaces numbers in a string uwu
+	// replaces numbers in a string uwu
 	$result = "";
 	$result = preg_replace('/[0-9]+/', '', $fixMe);
 	return $result;
 }
 
 
+echo "<h2>Card Sort from the sortme Category</h2>";
+
+// grab your input
+$inputCards = catCards( $workTCG, $mySortCat );
+echo "<p>Your input: " . $inputCards ."</p>";
+
+$sayArray = cardArray($inputCards);
+
+// grab your decks
+$inputCardsTwo = replaceNumber($inputCards);
+$sayArrayCheck = deckArray($inputCardsTwo);
+
+// grab collecting
+$colCards = callCollect( $workTCG );
+$colCards = replaceNumber($colCards);
+$colArray = deckArray($colCards);
+
+// start your excludes
+$excludeCol = array();
+$excludeMe = array();
+
+// check if your decks are found in collectiong
+$foundArray = array_intersect( $colArray, $sayArrayCheck);
+
+if(count($foundArray) > 0) {
+	echo "<p><h3>Collecting</h3>";
+	foreach ( $foundArray as $decksToFind) {
+		// dig thru the found array
+		foreach( $sayArray as $cardsToFind) {
+			// dig thru the input array
+			if( strpos($cardsToFind, $decksToFind ) !== false && $decksToFind !== "") {
+				// if found, print!
+				echo $cardsToFind . ", ";
+				// push cards we've found to remove from leftovers
+				array_push ($excludeCol, $cardsToFind);
+				// push cards we've found to remove for extras
+				array_push ($excludeMe, $cardsToFind);
+			}
+		}
+	}
+	echo "</p>";
+}
+
+// unset foreach
+unset($cardsToFind, $decksToFind);
+
+// lets grab our leftovers
+$leftoverArray = array_diff( $sayArray, $excludeCol );
+
+// create a new deckcheck array
+$leftoverArrayCheckCards = implode(", ", $leftoverArray);
+$leftoverArrayCheckCards = replaceNumber($leftoverArrayCheckCards);
+$leftoverArrayCheck = deckArray($leftoverArrayCheckCards);
+
 // find my categories
 $myCategories = grabCats( $workTCG ); // grab your categories
 $countMeIn = sizeof($myCategories);
 
-// grab your inputs
-$inputCards =   catCards( $workTCG, $mySortCat ); 
-$sayArray = cardArray($inputCards);
-
-// grab your input decks
-$inputCardsTwo = replaceNumber($inputCards);
-$sayArrayCheck = deckArray($inputCardsTwo);
-
-echo "<h2>Card Sort from the sortme Category</h2>";
-
-$excludeMe = array();
-
+// dig through categories
 foreach( $myCategories as &$meow ) {
-	if ( $meow !== $mySortCat ) {
+	if ($meow !== $mySortCat) {
 		// grab cards
 		$workingCards = catCards( $workTCG, $meow );
 		if($workingCards !== "") {
-      
 			// remove numbers
 			$workingCards = replaceNumber($workingCards);
-      
 			// create working array
 			$workArray = deckArray($workingCards);
+			// find DECK matches
+			$foundArray = array_intersect($workArray, $leftoverArrayCheck);
 
-      // find matches in the array
-			$foundArray = array_intersect($workArray, $sayArrayCheck);
-
-      // check if there were any matches
+			// match check
 			if(count($foundArray) > 0) {
 				echo "<p><h3>" . $meow . "</h3>";
 				foreach ( $foundArray as $decksToFind) {
-          // dig through the found array
-					foreach( $sayArray as $cardsToFind) {
-            // dig through the input array
+					// dig through the found array
+					foreach( $leftoverArray as $cardsToFind) {
+						// dig thru the input array
 						if( strpos($cardsToFind, $decksToFind ) !== false && $decksToFind !== "") {
-              // if you find cards, print them!
+							// matches found, print!
 							echo $cardsToFind . ", ";
-              // push cards we've already found to another array
+							// push more cards weve found
 							array_push ($excludeMe, $cardsToFind);
 						}
 					}
@@ -192,21 +273,15 @@ foreach( $myCategories as &$meow ) {
 	}
 }
 
-// unset foreach variables
 unset($meow, $cardsToFind, $decksToFind);
 
-// check if theres anymore cards to print
-$excludeMeSize = sizeof($excludeMe);
 $sayArraySize = sizeof($sayArray);
+$excludeMeSize = sizeof($excludeMe);
 
 if( $sayArraySize !== $excludeMeSize ) {
 	echo "<h3>Unsorted Cards</h3>";
-  
-  // find the extra cards
-	$extraCards = array_diff($sayArray, $excludeMe);
-  // make the array a string
+	$extraCards = array_diff($leftoverArray, $excludeMe);
 	$extraCardsPrint = implode(", ", $extraCards);
-  // print the extra cards!
 	echo $extraCardsPrint;
 }
 
